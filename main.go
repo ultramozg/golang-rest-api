@@ -23,6 +23,10 @@ func GetAllPeoples(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error to fetch data from db", http.StatusInternalServerError)
 		return
 	}
+	if len(peoples) == 0 {
+		http.Error(w, "Not Found", http.StatusNotFound)
+		return
+	}
 
 	resp, _ := json.Marshal(peoples)
 	w.Header().Set("Content-Type", "application/json")
@@ -32,7 +36,12 @@ func GetAllPeoples(w http.ResponseWriter, r *http.Request) {
 
 func GetPeople(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	people, err := dao.FindById(params["id"])
+	id := params["id"]
+	if id == "" {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+	people, err := dao.FindById(id)
 	if err != nil {
 		http.Error(w, "Not Found", http.StatusNotFound)
 		return
@@ -56,7 +65,11 @@ func CreatePeople(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	resp, _ := json.Marshal(p)
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
+	w.Write(resp)
 }
 
 func UpdatePeople(w http.ResponseWriter, r *http.Request) {
@@ -71,7 +84,10 @@ func UpdatePeople(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	resp, _ := json.Marshal("{result : success}")
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
+	w.Write(resp)
 }
 
 func DeletePeople(w http.ResponseWriter, r *http.Request) {

@@ -48,3 +48,8 @@ func (m *DBServer) Delete(p People) error {
 func (m *DBServer) Update(p People) error {
 	return db.C("peoples").UpdateId(p.ID, &p)
 }
+
+func (m *DBServer) DeleteCollection() error {
+	_, err := db.C("peoples").RemoveAll(nil)
+	return err
+}
